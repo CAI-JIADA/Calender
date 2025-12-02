@@ -1,0 +1,14 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>qml/main.qml</file>
+        <file>qml/CalendarView.qml</file>
+        <file>qml/SearchBar.qml</file>
+        <file>qml/CalendarSidebar.qml</file>
+        <file>qml/EventDetailPanel.qml</file>
+        <file>qml/EventList.qml</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <!-- 圖示資源將在此添加 -->
+    </qresource>
+</RCC>
