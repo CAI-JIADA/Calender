@@ -678,6 +678,9 @@ public:
         QList<Event> events;
         QString data = QString::fromUtf8(icsData);
         
+        // 處理 iCalendar 續行（以空格或 TAB 開頭的行）
+        data.replace(QRegularExpression("\r?\n[ \t]"), "");
+        
         // 簡單的 VEVENT 解析
         QRegularExpression eventRegex(
             "BEGIN:VEVENT.*?END:VEVENT",
@@ -696,11 +699,15 @@ public:
             event.location = extractField(eventBlock, "LOCATION");
             
             // 解析日期時間
-            QString dtStart = extractField(eventBlock, "DTSTART");
+            QString dtStart = extractFieldWithParams(eventBlock, "DTSTART");
             event.dtStart = parseDateTime(dtStart);
             
-            QString dtEnd = extractField(eventBlock, "DTEND");
+            QString dtEnd = extractFieldWithParams(eventBlock, "DTEND");
             event.dtEnd = parseDateTime(dtEnd);
+            
+            // 檢查是否為全天事件
+            // 全天事件的日期格式為 YYYYMMDD（無時間部分）
+            event.isAllDay = dtStart.length() == 8; // YYYYMMDD 格式
             
             events.append(event);
         }
@@ -709,9 +716,21 @@ public:
     }
     
 private:
+    static QString extractFieldWithParams(const QString& block, 
+                                         const QString& fieldName) {
+        // 處理帶參數的欄位，例如 DTSTART;TZID=Asia/Taipei:20240101T120000
+        QRegularExpression regex(fieldName + "[^:]*:(.*)");
+        QRegularExpressionMatch match = regex.match(block);
+        if (match.hasMatch()) {
+            return match.captured(1).trimmed();
+        }
+        return QString();
+    }
     static QString extractField(const QString& block, 
                                const QString& fieldName) {
-        QRegularExpression regex(fieldName + ":(.*)");
+        // 處理簡單欄位（不帶參數）
+        // 注意：iCalendar 欄位可能包含冒號，所以只匹配第一個冒號
+        QRegularExpression regex(fieldName + ":([^\r\n]*)");
         QRegularExpressionMatch match = regex.match(block);
         if (match.hasMatch()) {
             return match.captured(1).trimmed();
@@ -722,33 +741,35 @@ private:
     static QDateTime parseDateTime(const QString& dtString) {
         // 處理多種 iCalendar 日期格式
         
+        if (dtString.isEmpty()) {
+            return QDateTime();
+        }
+        
         // 1. UTC 格式: 20240101T120000Z
-        QDateTime dt = QDateTime::fromString(dtString, "yyyyMMddTHHmmss'Z'");
-        if (dt.isValid()) {
-            dt.setTimeSpec(Qt::UTC);
-            return dt;
+        if (dtString.endsWith('Z')) {
+            QDateTime dt = QDateTime::fromString(dtString, "yyyyMMddTHHmmss'Z'");
+            if (dt.isValid()) {
+                dt.setTimeSpec(Qt::UTC);
+                return dt;
+            }
         }
         
-        // 2. 本地時間格式: 20240101T120000
-        dt = QDateTime::fromString(dtString, "yyyyMMddTHHmmss");
-        if (dt.isValid()) {
-            return dt;
+        // 2. 帶時區的格式: TZID=Asia/Taipei:20240101T120000
+        // 注意：這是從 extractFieldWithParams 傳來的值（已移除 DTSTART; 前綴）
+        if (dtString.contains('T')) {
+            // 本地時間格式: 20240101T120000
+            QDateTime dt = QDateTime::fromString(dtString, "yyyyMMddTHHmmss");
+            if (dt.isValid()) {
+                // 注意：實際應用中應該解析 VTIMEZONE 並正確處理時區
+                return dt;
+            }
         }
         
-        // 3. 全天事件格式: 20240101
-        QDate date = QDate::fromString(dtString, "yyyyMMdd");
-        if (date.isValid()) {
-            return QDateTime(date, QTime(0, 0, 0));
-        }
-        
-        // 4. 帶時區的格式 (TZID 需要額外處理)
-        // 這裡簡化處理，實際應用中應該解析 VTIMEZONE
-        if (dtString.contains("TZID=")) {
-            // 提取日期時間部分 (TZID=Asia/Taipei:20240101T120000)
-            int colonPos = dtString.indexOf(':');
-            if (colonPos > 0) {
-                QString dateTimePart = dtString.mid(colonPos + 1);
-                return parseDateTime(dateTimePart);
+        // 3. 全天事件格式: 20240101 (VALUE=DATE)
+        if (dtString.length() == 8 && !dtString.contains('T')) {
+            QDate date = QDate::fromString(dtString, "yyyyMMdd");
+            if (date.isValid()) {
+                return QDateTime(date, QTime(0, 0, 0));
             }
         }
         
