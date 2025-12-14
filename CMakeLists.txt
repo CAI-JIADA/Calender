@@ -12,6 +12,7 @@ set(CMAKE_AUTOUIC ON)
 # Qt 模組
 find_package(Qt6 REQUIRED COMPONENTS
     Core
+    Gui
     Network
     Sql
 )
@@ -48,6 +49,7 @@ add_executable(CalendarIntegration
 # 連結 Qt 函式庫
 target_link_libraries(CalendarIntegration
     Qt6::Core
+    Qt6::Gui
     Qt6::Network
     Qt6::Sql
 )
