@@ -821,6 +821,8 @@ int main(int argc, char *argv[]) {
 
 #### 跨平台部署注意事項
 
+> **💡 Windows 自動部署**: 從 CMakeLists.txt 更新後，Windows 平台會在建置時自動執行 `windeployqt`，將所有必要的 Qt DLL 複製到執行檔目錄，無需手動部署步驟。
+
 ##### Windows
 ```powershell
 # 建置 Qt 專案
@@ -829,8 +831,10 @@ mkdir build && cd build
 cmake .. -DCMAKE_PREFIX_PATH=C:/Qt/6.x/msvc2019_64
 cmake --build . --config Release
 
-# 部署
-windeployqt Release/YourApp.exe
+# Qt DLL 會自動部署（透過 CMakeLists.txt 中的 windeployqt 設定）
+# 建置完成後，所有必要的 Qt DLL 已自動複製到執行檔目錄
+# 可以直接執行：
+.\Release\CalendarIntegration.exe
 ```
 
 ##### Linux

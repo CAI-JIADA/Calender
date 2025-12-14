@@ -163,12 +163,16 @@ cd build
 # 執行 CMake（替換為您的 Qt 安裝路徑）
 cmake .. -DCMAKE_PREFIX_PATH="C:/Qt/6.5.3/msvc2019_64"
 
-# 建置
+# 建置（Qt DLL 會自動部署到執行檔目錄）
 cmake --build . --config Release
 
 # 執行檔位置
 cd Release
+
+# 注意：所有必要的 Qt DLL 已自動複製，可直接執行
 ```
+
+> **💡 提示**: CMake 會在建置時自動執行 `windeployqt`，將所有必要的 Qt DLL (Qt6Core.dll, Qt6Gui.dll, Qt6Network.dll, Qt6Sql.dll 等) 複製到 Release 目錄，無需手動部署。
 
 #### Linux
 
@@ -461,17 +465,32 @@ cmake .. -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@6
 **解決方案**：
 
 #### Windows
-```powershell
-# 方法 1: 使用 windeployqt
-cd build/Release
-windeployqt CalendarIntegration.exe
 
-# 方法 2: 手動複製 DLL
-# 從 C:/Qt/6.5.3/msvc2019_64/bin/ 複製以下檔案到執行檔目錄：
-# - Qt6Core.dll
-# - Qt6Network.dll
-# - Qt6Sql.dll
-```
+> **💡 自動修復**: 從最新版本的 CMakeLists.txt 開始，此問題應該已自動解決。建置時會自動執行 `windeployqt` 複製所有必要的 DLL。
+
+如果您仍然遇到此問題，可能是以下原因：
+
+1. **使用舊版建置**：請重新執行完整建置流程
+   ```powershell
+   cd build
+   cmake --build . --config Release
+   ```
+
+2. **windeployqt 未找到**：CMake 會顯示警告。手動執行：
+   ```powershell
+   cd build/Release
+   C:/Qt/6.5.3/msvc2019_64/bin/windeployqt.exe CalendarIntegration.exe
+   ```
+
+3. **手動複製 DLL**（最後手段）：
+   ```powershell
+   # 從 C:/Qt/6.5.3/msvc2019_64/bin/ 複製以下檔案到執行檔目錄：
+   # - Qt6Core.dll
+   # - Qt6Network.dll
+   # - Qt6Sql.dll
+   # - Qt6Gui.dll
+   # 以及其他 windeployqt 會複製的依賴項
+   ```
 
 #### Linux
 ```bash
