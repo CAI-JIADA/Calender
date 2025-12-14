@@ -2,7 +2,7 @@
 
 #include <QObject>
 #include <QList>
-#include "CalendarEvent.h"
+#include "core/CalendarEvent.h"
 
 // 抽象基類 - 所有平台適配器的介面
 class CalendarAdapter : public QObject {

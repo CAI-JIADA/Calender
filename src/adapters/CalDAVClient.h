@@ -7,7 +7,7 @@
 #include <QSslConfiguration>
 #include <QDateTime>
 #include <QUrl>
-#include "CalendarEvent.h"
+#include "core/CalendarEvent.h"
 
 // 行事曆資訊結構
 struct CalendarInfo {
