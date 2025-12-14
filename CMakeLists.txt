@@ -59,6 +59,28 @@ target_include_directories(CalendarIntegration PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+# Windows 平台自動部署 Qt 相依檔案
+if(WIN32)
+    # 找到 windeployqt 工具
+    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
+    
+    if(WINDEPLOYQT_EXECUTABLE)
+        # 在建置後自動執行 windeployqt
+        add_custom_command(TARGET CalendarIntegration POST_BUILD
+            COMMAND "${WINDEPLOYQT_EXECUTABLE}"
+                --no-translations
+                --no-system-d3d-compiler
+                --no-opengl-sw
+                "$<TARGET_FILE:CalendarIntegration>"
+            COMMENT "執行 windeployqt 部署 Qt 相依檔案..."
+        )
+    else()
+        message(WARNING "找不到 windeployqt 工具，可能需要手動複製 Qt DLL 檔案")
+    endif()
+endif()
+
 # 安裝規則
 install(TARGETS CalendarIntegration
     RUNTIME DESTINATION bin
