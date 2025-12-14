@@ -190,18 +190,21 @@ void MainWindow::setupUI() {
 void MainWindow::onGoogleAuthClicked() {
     updateStatusBar("正在連接 Google Calendar...");
     
-    // 注意：實際使用時需要從設定檔或環境變數讀取
-    QString clientId = "YOUR_GOOGLE_CLIENT_ID";
-    QString clientSecret = "YOUR_GOOGLE_CLIENT_SECRET";
+    // 從環境變數讀取 OAuth 憑證
+    QString clientId = qEnvironmentVariable("GOOGLE_CLIENT_ID");
+    QString clientSecret = qEnvironmentVariable("GOOGLE_CLIENT_SECRET");
     
-    if (clientId == "YOUR_GOOGLE_CLIENT_ID") {
+    if (clientId.isEmpty() || clientSecret.isEmpty()) {
         QMessageBox::warning(this, "設定錯誤",
-            "請在程式碼中設定您的 Google OAuth 2.0 憑證\n\n"
+            "請設定 Google OAuth 2.0 環境變數\n\n"
+            "設定方式：\n"
+            "export GOOGLE_CLIENT_ID=\"your_client_id.apps.googleusercontent.com\"\n"
+            "export GOOGLE_CLIENT_SECRET=\"your_client_secret\"\n\n"
             "取得步驟：\n"
             "1. 前往 Google Cloud Console\n"
             "2. 建立專案並啟用 Calendar API\n"
             "3. 建立 OAuth 2.0 憑證\n"
-            "4. 將 Client ID 和 Client Secret 填入程式中");
+            "4. 設定環境變數後重新啟動程式");
         updateStatusBar("就緒");
         return;
     }
@@ -213,19 +216,22 @@ void MainWindow::onGoogleAuthClicked() {
 void MainWindow::onOutlookAuthClicked() {
     updateStatusBar("正在連接 Microsoft Outlook...");
     
-    // 注意：實際使用時需要從設定檔或環境變數讀取
-    QString clientId = "YOUR_OUTLOOK_CLIENT_ID";
-    QString clientSecret = "YOUR_OUTLOOK_CLIENT_SECRET";
+    // 從環境變數讀取 OAuth 憑證
+    QString clientId = qEnvironmentVariable("OUTLOOK_CLIENT_ID");
+    QString clientSecret = qEnvironmentVariable("OUTLOOK_CLIENT_SECRET");
     
-    if (clientId == "YOUR_OUTLOOK_CLIENT_ID") {
+    if (clientId.isEmpty() || clientSecret.isEmpty()) {
         QMessageBox::warning(this, "設定錯誤",
-            "請在程式碼中設定您的 Microsoft Azure AD 憑證\n\n"
+            "請設定 Microsoft Azure AD 環境變數\n\n"
+            "設定方式：\n"
+            "export OUTLOOK_CLIENT_ID=\"your_application_client_id\"\n"
+            "export OUTLOOK_CLIENT_SECRET=\"your_client_secret\"\n\n"
             "取得步驟：\n"
             "1. 前往 Azure Portal\n"
             "2. 註冊應用程式\n"
             "3. 設定 API 權限 (Calendars.Read, Tasks.Read)\n"
             "4. 建立 Client Secret\n"
-            "5. 將 Client ID 和 Client Secret 填入程式中");
+            "5. 設定環境變數後重新啟動程式");
         updateStatusBar("就緒");
         return;
     }

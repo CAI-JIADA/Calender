@@ -182,21 +182,37 @@ make -j$(sysctl -n hw.ncpu)
    - 名稱：「Calendar Integration Desktop」
 5. 記錄 Client ID 和 Client Secret
 
-#### 步驟 4：設定程式
+#### 步驟 4：設定環境變數
 
-編輯 `src/ui/MainWindow.cpp`：
+設定環境變數以儲存 OAuth 憑證（不要直接寫在程式碼中）：
 
-```cpp
-void MainWindow::onGoogleAuthClicked() {
-    QString clientId = "YOUR_CLIENT_ID.apps.googleusercontent.com";
-    QString clientSecret = "YOUR_CLIENT_SECRET";
-    // ...
-}
+**Linux/macOS:**
+```bash
+export GOOGLE_CLIENT_ID="YOUR_CLIENT_ID.apps.googleusercontent.com"
+export GOOGLE_CLIENT_SECRET="YOUR_CLIENT_SECRET"
 ```
 
-替換為您的 Google OAuth 憑證。
+**Windows (PowerShell):**
+```powershell
+$env:GOOGLE_CLIENT_ID="YOUR_CLIENT_ID.apps.googleusercontent.com"
+$env:GOOGLE_CLIENT_SECRET="YOUR_CLIENT_SECRET"
+```
 
-### 測試 Google Calendar 連線
+**Windows (CMD):**
+```cmd
+set GOOGLE_CLIENT_ID=YOUR_CLIENT_ID.apps.googleusercontent.com
+set GOOGLE_CLIENT_SECRET=YOUR_CLIENT_SECRET
+```
+
+將 `YOUR_CLIENT_ID` 和 `YOUR_CLIENT_SECRET` 替換為您在步驟 3 中取得的實際憑證。
+
+**永久設定（可選）：**
+
+Linux/macOS：將 export 指令加入 `~/.bashrc` 或 `~/.zshrc`
+
+Windows：在「系統內容」→「環境變數」中設定
+
+#### 步驟 5：重新建置並執行
 
 #### 測試 1：OAuth 認證
 
@@ -256,19 +272,31 @@ void MainWindow::onGoogleAuthClicked() {
    - `Tasks.Read`
    - `User.Read`
 
-#### 步驟 4：設定程式
+#### 步驟 4：設定環境變數
 
-編輯 `src/ui/MainWindow.cpp`：
+設定環境變數以儲存 Azure AD OAuth 憑證：
 
-```cpp
-void MainWindow::onOutlookAuthClicked() {
-    QString clientId = "YOUR_APPLICATION_CLIENT_ID";
-    QString clientSecret = "YOUR_CLIENT_SECRET";
-    // ...
-}
+**Linux/macOS:**
+```bash
+export OUTLOOK_CLIENT_ID="YOUR_APPLICATION_CLIENT_ID"
+export OUTLOOK_CLIENT_SECRET="YOUR_CLIENT_SECRET"
 ```
 
-### 測試 Microsoft Outlook 連線
+**Windows (PowerShell):**
+```powershell
+$env:OUTLOOK_CLIENT_ID="YOUR_APPLICATION_CLIENT_ID"
+$env:OUTLOOK_CLIENT_SECRET="YOUR_CLIENT_SECRET"
+```
+
+**Windows (CMD):**
+```cmd
+set OUTLOOK_CLIENT_ID=YOUR_APPLICATION_CLIENT_ID
+set OUTLOOK_CLIENT_SECRET=YOUR_CLIENT_SECRET
+```
+
+將憑證替換為您在步驟 1 和步驟 2 中取得的實際值。
+
+#### 步驟 5：重新建置並執行
 
 #### 測試 1：OAuth 認證
 
