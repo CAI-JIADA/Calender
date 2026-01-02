@@ -398,9 +398,12 @@ brew reinstall qt@6
 4. 確認「重新導向 URI」設定為 `http://localhost:8081/`（**必須包含結尾斜線**）
 5. 如果已經存在 `http://localhost:8081`（無斜線），請將其刪除並重新新增 `http://localhost:8081/`（含斜線）
 6. 點選「儲存」
-7. 重新執行應用程式並嘗試認證
+7. 重新建置並執行應用程式
 
-**注意：** Microsoft Azure AD 對重新導向 URI 的格式非常嚴格，必須完全匹配（包括是否有結尾斜線）。
+**注意事項：**
+- Microsoft Azure AD 對重新導向 URI 的格式非常嚴格，必須完全匹配（包括是否有結尾斜線）
+- 應用程式已更新為使用 `setModifyParametersFunction` 明確設定 `redirect_uri` 參數為 `http://localhost:8081/`
+- 必須確保 Azure AD 註冊的 URI 與程式碼中設定的完全一致
 
 ### Q3: 無法獲取事件
 

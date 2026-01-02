@@ -7,6 +7,7 @@
 #include <QNetworkReply>
 #include <QUrlQuery>
 #include <QDateTime>
+#include <QAbstractOAuth>
 
 OutlookCalendarAdapter::OutlookCalendarAdapter(QObject* parent)
     : CalendarAdapter(parent)
@@ -53,6 +54,14 @@ void OutlookCalendarAdapter::setupOAuth() {
     m_replyHandler = new QOAuthHttpServerReplyHandler(8081, this);
     m_replyHandler->setCallbackPath("/");  // 明確設定回調路徑為根路徑
     m_oauth->setReplyHandler(m_replyHandler);
+    
+    // 明確設定 redirect_uri 參數以確保與 Azure AD 註冊的 URI 完全匹配
+    m_oauth->setModifyParametersFunction([](QAbstractOAuth::Stage stage, QMultiMap<QString, QVariant>* parameters) {
+        if (stage == QAbstractOAuth::Stage::RequestingAuthorization) {
+            // 確保 redirect_uri 使用正確的格式（包含結尾斜線）
+            parameters->replace("redirect_uri", "http://localhost:8081/");
+        }
+    });
     
     connect(m_oauth, &QOAuth2AuthorizationCodeFlow::granted,
             this, &OutlookCalendarAdapter::onAuthenticationGranted);
