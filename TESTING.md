@@ -271,38 +271,6 @@ brew reinstall qt@6
 
 ---
 
-## 測試檢查清單
-
-### 環境設定
-- [ ] Qt 6 已安裝（含 NetworkAuth 模組）
-- [ ] CMake 已安裝
-- [ ] 已取得 Google OAuth 憑證
-- [ ] 已註冊 Azure AD 應用程式
-
-### 建置測試
-- [ ] CMake 設定成功
-- [ ] 專案建置成功
-- [ ] 執行檔正常啟動
-
-### Google Calendar
-- [ ] OAuth 認證成功
-- [ ] 獲取事件成功
-- [ ] 事件資訊正確
-- [ ] 搜尋功能正常
-
-### Microsoft Outlook
-- [ ] OAuth 認證成功
-- [ ] 獲取事件成功
-- [ ] 事件資訊正確
-
-### UI 測試
-- [ ] 佈局正確
-- [ ] 互動正常
-- [ ] 雙平台整合正常
-- [ ] 狀態更新正確
-
----
-
 ## 參考資源
 
 - [Google Calendar API](https://developers.google.com/calendar/api)
