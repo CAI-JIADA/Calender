@@ -180,6 +180,7 @@ make -j$(sysctl -n hw.ncpu)
 4. 建立 OAuth 用戶端 ID
    - 類型：「桌面應用程式」
    - 名稱：「Calendar Integration Desktop」
+   - 注意：桌面應用程式類型會自動設定 `http://localhost` 作為授權重新導向 URI
 5. 記錄 Client ID 和 Client Secret
 
 #### 步驟 4：設定環境變數
