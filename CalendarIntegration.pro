@@ -1,5 +1,19 @@
 # Qt 多平台行事曆整合工具
-QT += core gui network networkauth sql widgets
+QT += core gui network sql widgets
+
+# NetworkAuth module (Qt6::NetworkAuth) is required for OAuth2 authentication
+# If you get "Unknown module(s) in QT: networkauth" error, install Qt NetworkAuth:
+# - Windows: Use Qt Maintenance Tool to install Qt NetworkAuth component
+# - Linux: Install libqt6networkauth6-dev or qt6-networkauth package
+# - macOS: Install via Homebrew or Qt online installer
+# Note: Some Qt installations may not include NetworkAuth by default
+qtHaveModule(networkauth) {
+    QT += networkauth
+    message("Qt NetworkAuth module found")
+} else {
+    warning("Qt NetworkAuth module not found - OAuth2 features will not work")
+    warning("Please install Qt NetworkAuth component from Qt installer")
+}
 
 CONFIG += c++17
 
