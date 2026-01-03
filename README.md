@@ -23,22 +23,15 @@ Qt 多平台行事曆整合工具 - 整合 Google、Outlook 行事曆的待辦�
 | Android | ✅ | ✅ |
 | iOS | ✅ | ✅ |
 
-### 快速開始
 
 #### 使用 Qt Creator 開啟專案
 
-本專案支援兩種建置系統：
-
-1. **使用 qmake (推薦用於 Qt Creator)**
+**使用 qmake (推薦用於 Qt Creator)**
    - 開啟 Qt Creator
    - 選擇 `檔案` > `開啟檔案或專案`
    - 選擇 `CalendarIntegration.pro` 檔案
-   - 配置編譯套件（Kit）並開始建置
 
-2. **使用 CMake**
-   - 開啟 Qt Creator
-   - 選擇 `檔案` > `開啟檔案或專案`
-   - 選擇 `CMakeLists.txt` 檔案
-   - 配置 CMake 並開始建置
+
+
 
 
