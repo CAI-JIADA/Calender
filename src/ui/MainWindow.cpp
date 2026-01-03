@@ -13,6 +13,9 @@
 #include <QFileDialog>
 #include <QStandardPaths>
 #include <QFile>
+#include <QPixmap>
+#include <QGraphicsOpacityEffect>
+#include <QResizeEvent>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -92,6 +95,17 @@ void MainWindow::setupUI() {
     // 創建中央元件
     m_centralWidget = new QWidget(this);
     setCentralWidget(m_centralWidget);
+    
+    // 創建背景圖片層
+    m_backgroundLabel = new QLabel(m_centralWidget);
+    m_backgroundLabel->setScaledContents(true);  // 自動縮放內容
+    m_backgroundLabel->setAlignment(Qt::AlignCenter);
+    m_backgroundLabel->lower();  // 將背景層放到最底層
+    
+    // 設定半透明效果用於淡化
+    QGraphicsOpacityEffect* opacityEffect = new QGraphicsOpacityEffect(m_backgroundLabel);
+    opacityEffect->setOpacity(0.5);  // 50% 不透明度
+    m_backgroundLabel->setGraphicsEffect(opacityEffect);
     
     QHBoxLayout* mainLayout = new QHBoxLayout(m_centralWidget);
     
@@ -478,25 +492,32 @@ void MainWindow::applyBackgroundImage() {
     
     if (imagePath.isEmpty() || !QFile::exists(imagePath)) {
         // 使用預設樣式（無背景圖片）
-        m_centralWidget->setStyleSheet("");
+        m_backgroundLabel->clear();
+        m_backgroundLabel->hide();
         return;
     }
     
-    // 套用背景圖片：拉伸至視窗同比例並淡化
-    // background-size: cover 會拉伸圖片以覆蓋整個容器，保持比例
-    // 使用半透明白色線性漸層遮罩來淡化背景圖片
-    QString styleSheet = QString(
-        "QWidget#centralWidget {"
-        "    background-image: "
-        "        linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)), "
-        "        url(%1);"
-        "    background-position: center center;"
-        "    background-repeat: no-repeat;"
-        "    background-attachment: fixed;"
-        "    background-size: cover, cover;"
-        "}"
-    ).arg(imagePath);
+    // 載入並顯示背景圖片
+    QPixmap pixmap(imagePath);
+    if (pixmap.isNull()) {
+        qWarning() << "無法載入圖片:" << imagePath;
+        m_backgroundLabel->clear();
+        m_backgroundLabel->hide();
+        return;
+    }
     
-    m_centralWidget->setObjectName("centralWidget");
-    m_centralWidget->setStyleSheet(styleSheet);
+    // 設定背景圖片並調整大小以覆蓋整個視窗
+    m_backgroundLabel->setPixmap(pixmap);
+    m_backgroundLabel->setGeometry(m_centralWidget->rect());
+    m_backgroundLabel->show();
+    m_backgroundLabel->lower();  // 確保背景在最底層
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event) {
+    QMainWindow::resizeEvent(event);
+    
+    // 當視窗大小改變時，調整背景圖片層的大小
+    if (m_backgroundLabel && !m_backgroundLabel->pixmap().isNull()) {
+        m_backgroundLabel->setGeometry(m_centralWidget->rect());
+    }
 }

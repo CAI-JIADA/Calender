@@ -42,8 +42,12 @@ private:
     void updateStatusBar(const QString& message);
     void applyBackgroundImage();
     
+    // 重寫事件處理
+    void resizeEvent(QResizeEvent* event) override;
+    
     // UI 元件
     QWidget* m_centralWidget;
+    QLabel* m_backgroundLabel;  // 背景圖片層
     QTreeWidget* m_calendarTree;
     QListWidget* m_eventList;
     QTextEdit* m_eventDetails;
