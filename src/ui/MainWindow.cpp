@@ -1,4 +1,5 @@
 #include "MainWindow.h"
+#include "ChangeLogDialog.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QSplitter>
@@ -9,6 +10,12 @@
 #include <QMenuBar>
 #include <QMenu>
 #include <QAction>
+#include <QFileDialog>
+#include <QStandardPaths>
+#include <QFile>
+#include <QPixmap>
+#include <QGraphicsOpacityEffect>
+#include <QResizeEvent>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -41,6 +48,9 @@ MainWindow::MainWindow(QWidget* parent)
     
     setupUI();
     
+    // 載入並套用背景圖片
+    applyBackgroundImage();
+    
     updateStatusBar("就緒 - 請先進行帳號認證");
 }
 
@@ -58,6 +68,21 @@ void MainWindow::setupUI() {
     QAction* exitAction = fileMenu->addAction("結束");
     connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
     
+    QMenu* viewMenu = menuBar->addMenu("檢視");
+    QAction* changeLogAction = viewMenu->addAction("修改紀錄 / 版本歷史");
+    connect(changeLogAction, &QAction::triggered, this, &MainWindow::onViewChangeLogClicked);
+    
+    QMenu* settingsMenu = menuBar->addMenu("設定");
+    QAction* changeBackgroundAction = settingsMenu->addAction("更改背景圖片");
+    connect(changeBackgroundAction, &QAction::triggered, this, &MainWindow::onChangeBackgroundClicked);
+    
+    QAction* resetBackgroundAction = settingsMenu->addAction("重設背景");
+    connect(resetBackgroundAction, &QAction::triggered, [this]() {
+        m_dbManager->saveSetting("background_image", "");
+        applyBackgroundImage();
+        QMessageBox::information(this, "成功", "背景已重設為預設樣式");
+    });
+    
     QMenu* helpMenu = menuBar->addMenu("說明");
     QAction* aboutAction = helpMenu->addAction("關於");
     connect(aboutAction, &QAction::triggered, [this]() {
@@ -70,6 +95,17 @@ void MainWindow::setupUI() {
     // 創建中央元件
     m_centralWidget = new QWidget(this);
     setCentralWidget(m_centralWidget);
+    
+    // 創建背景圖片層
+    m_backgroundLabel = new QLabel(m_centralWidget);
+    m_backgroundLabel->setScaledContents(true);  // 自動縮放內容
+    m_backgroundLabel->setAlignment(Qt::AlignCenter);
+    m_backgroundLabel->lower();  // 將背景層放到最底層
+    
+    // 設定半透明效果用於淡化
+    QGraphicsOpacityEffect* opacityEffect = new QGraphicsOpacityEffect(m_backgroundLabel);
+    opacityEffect->setOpacity(0.5);  // 50% 不透明度
+    m_backgroundLabel->setGraphicsEffect(opacityEffect);
     
     QHBoxLayout* mainLayout = new QHBoxLayout(m_centralWidget);
     
@@ -421,4 +457,67 @@ void MainWindow::showEventDetails(const CalendarEvent& event) {
 void MainWindow::updateStatusBar(const QString& message) {
     m_statusLabel->setText(message);
     statusBar()->showMessage(message, 3000);
+}
+
+void MainWindow::onViewChangeLogClicked() {
+    ChangeLogDialog dialog(m_dbManager, this);
+    dialog.exec();
+}
+
+void MainWindow::onChangeBackgroundClicked() {
+    QString picturesPath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+    
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        "選擇背景圖片",
+        picturesPath,
+        "圖片檔案 (*.png *.jpg *.jpeg *.bmp *.gif);;所有檔案 (*.*)"
+    );
+    
+    if (filePath.isEmpty()) {
+        return;  // 使用者取消
+    }
+    
+    // 儲存圖片路徑到設定
+    if (m_dbManager->saveSetting("background_image", filePath)) {
+        applyBackgroundImage();
+        QMessageBox::information(this, "成功", "背景圖片已更新！");
+    } else {
+        QMessageBox::warning(this, "錯誤", "無法儲存背景圖片設定");
+    }
+}
+
+void MainWindow::applyBackgroundImage() {
+    QString imagePath = m_dbManager->loadSetting("background_image", "");
+    
+    if (imagePath.isEmpty() || !QFile::exists(imagePath)) {
+        // 使用預設樣式（無背景圖片）
+        m_backgroundLabel->clear();
+        m_backgroundLabel->hide();
+        return;
+    }
+    
+    // 載入並顯示背景圖片
+    QPixmap pixmap(imagePath);
+    if (pixmap.isNull()) {
+        qWarning() << "無法載入圖片:" << imagePath;
+        m_backgroundLabel->clear();
+        m_backgroundLabel->hide();
+        return;
+    }
+    
+    // 設定背景圖片並調整大小以覆蓋整個視窗
+    m_backgroundLabel->setPixmap(pixmap);
+    m_backgroundLabel->setGeometry(m_centralWidget->rect());
+    m_backgroundLabel->show();
+    m_backgroundLabel->lower();  // 確保背景在最底層
+}
+
+void MainWindow::resizeEvent(QResizeEvent* event) {
+    QMainWindow::resizeEvent(event);
+    
+    // 當視窗大小改變時，調整背景圖片層的大小
+    if (m_backgroundLabel && !m_backgroundLabel->pixmap().isNull()) {
+        m_backgroundLabel->setGeometry(m_centralWidget->rect());
+    }
 }
