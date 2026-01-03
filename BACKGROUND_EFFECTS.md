@@ -6,13 +6,13 @@
 
 ### 1. 淡化效果 (Fade Effect)
 
-背景圖片會自動添加 50% 不透明度的白色遮罩層，使背景看起來更柔和，確保前景文字和 UI 元件清晰可讀。
+背景圖片會自動添加 50% 不透明度效果，使背景看起來更柔和，確保前景文字和 UI 元件清晰可讀。
 
 **技術實作：**
-```css
-background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
-    url(path/to/image);
+```cpp
+QGraphicsOpacityEffect* opacityEffect = new QGraphicsOpacityEffect(m_backgroundLabel);
+opacityEffect->setOpacity(0.5);  // 50% 不透明度
+m_backgroundLabel->setGraphicsEffect(opacityEffect);
 ```
 
 **效果：**
@@ -25,10 +25,10 @@ background-image:
 背景圖片會自動縮放以覆蓋整個應用程式視窗，同時保持圖片原始比例。
 
 **技術實作：**
-```css
-background-size: cover, cover;
-background-position: center center;
-background-repeat: no-repeat;
+```cpp
+m_backgroundLabel->setScaledContents(true);  // 自動縮放
+m_backgroundLabel->setPixmap(pixmap);
+m_backgroundLabel->setGeometry(m_centralWidget->rect());
 ```
 
 **效果：**
@@ -85,15 +85,21 @@ background-repeat: no-repeat;
 
 ### 技術細節
 
-**CSS 屬性：**
-- `background-size: cover` - 縮放圖片以完全覆蓋容器
-- `linear-gradient()` - 添加半透明白色遮罩層
-- `rgba(255, 255, 255, 0.5)` - 50% 不透明度白色
+**Qt 元件：**
+- `QLabel` - 背景圖片容器
+- `QPixmap` - 圖片載入和渲染
+- `QGraphicsOpacityEffect` - 淡化效果（50% 不透明度）
+- `setScaledContents(true)` - 自動縮放以覆蓋容器
 
 **Qt 實作：**
-- 使用 QWidget StyleSheet
-- 支援多層背景疊加
+- 使用原生 Qt 元件而非 StyleSheet
 - 自動處理不同圖片比例
+- resizeEvent 處理視窗大小改變
+
+**為什麼不使用 StyleSheet？**
+- Qt StyleSheet 不支援 CSS3 的 `linear-gradient`
+- Qt StyleSheet 不支援多層背景圖片
+- 原生元件提供更好的效能和控制
 
 ---
 

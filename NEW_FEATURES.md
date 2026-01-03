@@ -72,10 +72,13 @@
 ### 技術細節
 
 - 背景圖片路徑儲存在本地資料庫的 `settings` 表中
-- 使用 Qt 的 StyleSheet 機制套用背景
-- 圖片使用 `background-size: cover` 自動拉伸至視窗同比例
-- 添加 50% 不透明度的白色遮罩層來淡化背景圖片
+- 使用 QLabel + QPixmap 顯示背景圖片（原生 Qt 渲染）
+- 使用 QGraphicsOpacityEffect 設定 50% 不透明度淡化效果
+- 圖片使用 `setScaledContents(true)` 自動拉伸至視窗同比例
+- 實作 resizeEvent 處理視窗大小改變時的背景調整
 - 每次啟動應用程式時會自動載入已儲存的背景設定
+
+**注意**：早期版本使用 CSS StyleSheet 實作，但 Qt StyleSheet 不支援 CSS3 的 `linear-gradient` 和多層背景。新版本改用原生 Qt 元件實作，更加穩定可靠。
 
 ---
 
