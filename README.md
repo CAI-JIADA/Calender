@@ -24,12 +24,40 @@ Qt 多平台行事曆整合工具 - 整合 Google、Outlook 行事曆的待辦�
 | iOS | ✅ | ✅ |
 
 
+## 🚀 快速開始
+
 #### 使用 Qt Creator 開啟專案
 
 **使用 qmake (推薦用於 Qt Creator)**
    - 開啟 Qt Creator
    - 選擇 `檔案` > `開啟檔案或專案`
    - 選擇 `CalendarIntegration.pro` 檔案
+
+## ⚠️ OAuth 認證問題？
+
+如果您在登入 Google Calendar 或 Microsoft Outlook 時遇到以下錯誤：
+
+- ❌ **錯誤 400: redirect_uri_mismatch** (Google)
+- ❌ **invalid_request: redirect_uri is not valid** (Microsoft)
+
+**請立即查看：** 📖 [**OAuth 認證問題排除指南 (OAUTH_TROUBLESHOOTING.md)**](./OAUTH_TROUBLESHOOTING.md)
+
+這份指南提供了詳細的步驟說明，教您如何正確設定 Google Cloud Console 和 Azure AD 的重新導向 URI。
+
+### 快速修復
+
+**Google Calendar 錯誤：**
+1. 前往 [Google Cloud Console](https://console.cloud.google.com/)
+2. 在 OAuth 2.0 憑證中新增：`http://localhost:8080/`（**必須包含結尾斜線**）
+
+**Microsoft Outlook 錯誤：**
+1. 前往 [Azure Portal](https://portal.azure.com/)
+2. 在應用程式驗證設定中新增：`http://localhost:8081/`（**必須包含結尾斜線**）
+
+## 📚 文件
+
+- [OAUTH_TROUBLESHOOTING.md](./OAUTH_TROUBLESHOOTING.md) - OAuth 認證問題排除指南
+- [TESTING.md](./TESTING.md) - 完整測試指南與設定說明
 
 
 
