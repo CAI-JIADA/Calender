@@ -40,9 +40,11 @@ Qt 多平台行事曆整合工具 - 整合 Google、Outlook 行事曆的待辦�
 - ❌ **錯誤 400: redirect_uri_mismatch** (Google)
 - ❌ **invalid_request: redirect_uri is not valid** (Microsoft)
 
-**請立即查看：** 📖 [**OAuth 認證問題排除指南 (OAUTH_TROUBLESHOOTING.md)**](./OAUTH_TROUBLESHOOTING.md)
+**🚨 需要立即修復？** 查看 [**快速修復指南 (QUICK_FIX.md)**](./QUICK_FIX.md)
 
-這份指南提供了詳細的步驟說明，教您如何正確設定 Google Cloud Console 和 Azure AD 的重新導向 URI。
+**📖 需要詳細說明？** 查看 [**OAuth 認證問題排除指南 (OAUTH_TROUBLESHOOTING.md)**](./OAUTH_TROUBLESHOOTING.md)
+
+這些指南提供了詳細的步驟說明，教您如何正確設定 Google Cloud Console 和 Azure AD 的重新導向 URI。
 
 ### 快速修復
 
@@ -56,7 +58,8 @@ Qt 多平台行事曆整合工具 - 整合 Google、Outlook 行事曆的待辦�
 
 ## 📚 文件
 
-- [OAUTH_TROUBLESHOOTING.md](./OAUTH_TROUBLESHOOTING.md) - OAuth 認證問題排除指南
+- [QUICK_FIX.md](./QUICK_FIX.md) - OAuth 錯誤快速修復（3 步驟解決）
+- [OAUTH_TROUBLESHOOTING.md](./OAUTH_TROUBLESHOOTING.md) - OAuth 認證問題排除指南（完整說明）
 - [TESTING.md](./TESTING.md) - 完整測試指南與設定說明
 
 
