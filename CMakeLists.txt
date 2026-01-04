@@ -40,10 +40,15 @@ set(HEADERS
     src/ui/MainWindow.h
 )
 
+set(UI_FILES
+    src/ui/mainwindow.ui
+)
+
 # 執行檔
 add_executable(CalendarIntegration
     ${SOURCES}
     ${HEADERS}
+    ${UI_FILES}
 )
 
 # 連結 Qt 函式庫

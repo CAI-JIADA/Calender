@@ -1,20 +1,25 @@
 #include "MainWindow.h"
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QSplitter>
-#include <QGroupBox>
+#include "ui_mainwindow.h"
 #include <QMessageBox>
-#include <QHeaderView>
-#include <QStatusBar>
-#include <QMenuBar>
-#include <QMenu>
-#include <QAction>
+#include <QDate>
+#include <QTime>
+#include <QDateTime>
+#include <QTreeWidgetItem>
+#include <QListWidgetItem>
+#include <QColor>
+#include <QIcon>
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
     , m_googleAuthenticated(false)
     , m_outlookAuthenticated(false)
 {
+    ui->setupUi(this);
+    
+    // 設定日期編輯器的預設值
+    ui->startDateEdit->setDate(QDate::currentDate());
+    ui->endDateEdit->setDate(QDate::currentDate().addDays(30));
     // 初始化資料庫
     m_dbManager = new DatabaseManager(this);
     if (!m_dbManager->initialize("calendar.db")) {
@@ -39,152 +44,40 @@ MainWindow::MainWindow(QWidget* parent)
     connect(m_outlookAdapter, &OutlookCalendarAdapter::authenticated,
             this, &MainWindow::onOutlookAuthenticated);
     
-    setupUI();
+    setupConnections();
     
     updateStatusBar("就緒 - 請先進行帳號認證");
 }
 
-MainWindow::~MainWindow() = default;
+MainWindow::~MainWindow() {
+    delete ui;
+}
 
-void MainWindow::setupUI() {
-    setWindowTitle("Qt 多平台行事曆整合工具");
-    resize(1200, 800);
+void MainWindow::setupConnections() {
+    // 連接按鈕信號
+    connect(ui->googleAuthBtn, &QPushButton::clicked,
+            this, &MainWindow::onGoogleAuthClicked);
+    connect(ui->outlookAuthBtn, &QPushButton::clicked,
+            this, &MainWindow::onOutlookAuthClicked);
+    connect(ui->fetchEventsBtn, &QPushButton::clicked,
+            this, &MainWindow::onFetchEventsClicked);
     
-    // 創建選單列
-    QMenuBar* menuBar = new QMenuBar(this);
-    setMenuBar(menuBar);
+    // 連接搜尋信號
+    connect(ui->searchEdit, &QLineEdit::textChanged,
+            this, &MainWindow::onSearchTextChanged);
     
-    QMenu* fileMenu = menuBar->addMenu("檔案");
-    QAction* exitAction = fileMenu->addAction("結束");
-    connect(exitAction, &QAction::triggered, this, &QMainWindow::close);
+    // 連接列表選擇信號
+    connect(ui->eventList, &QListWidget::itemClicked,
+            this, &MainWindow::onEventSelected);
     
-    QMenu* helpMenu = menuBar->addMenu("說明");
-    QAction* aboutAction = helpMenu->addAction("關於");
-    connect(aboutAction, &QAction::triggered, [this]() {
+    // 連接選單動作
+    connect(ui->actionExit, &QAction::triggered, this, &QMainWindow::close);
+    connect(ui->actionAbout, &QAction::triggered, [this]() {
         QMessageBox::about(this, "關於",
             "Qt 多平台行事曆整合工具\n\n"
             "整合 Google Calendar 和 Microsoft Outlook 的行事曆管理工具\n\n"
             "版本: 1.0.0");
     });
-    
-    // 創建中央元件
-    m_centralWidget = new QWidget(this);
-    setCentralWidget(m_centralWidget);
-    
-    QHBoxLayout* mainLayout = new QHBoxLayout(m_centralWidget);
-    
-    // 左側面板 - 帳號管理和行事曆列表
-    QWidget* leftPanel = new QWidget();
-    QVBoxLayout* leftLayout = new QVBoxLayout(leftPanel);
-    leftPanel->setMaximumWidth(300);
-    
-    // 帳號認證區
-    QGroupBox* accountGroup = new QGroupBox("帳號認證");
-    QVBoxLayout* accountLayout = new QVBoxLayout(accountGroup);
-    
-    m_googleAuthBtn = new QPushButton("連接 Google Calendar");
-    m_googleAuthBtn->setStyleSheet("QPushButton { padding: 8px; }");
-    connect(m_googleAuthBtn, &QPushButton::clicked,
-            this, &MainWindow::onGoogleAuthClicked);
-    accountLayout->addWidget(m_googleAuthBtn);
-    
-    m_outlookAuthBtn = new QPushButton("連接 Microsoft Outlook");
-    m_outlookAuthBtn->setStyleSheet("QPushButton { padding: 8px; }");
-    connect(m_outlookAuthBtn, &QPushButton::clicked,
-            this, &MainWindow::onOutlookAuthClicked);
-    accountLayout->addWidget(m_outlookAuthBtn);
-    
-    leftLayout->addWidget(accountGroup);
-    
-    // 行事曆列表區
-    QGroupBox* calendarGroup = new QGroupBox("行事曆");
-    QVBoxLayout* calendarLayout = new QVBoxLayout(calendarGroup);
-    
-    m_calendarTree = new QTreeWidget();
-    m_calendarTree->setHeaderLabel("我的行事曆");
-    m_calendarTree->setMaximumHeight(200);
-    calendarLayout->addWidget(m_calendarTree);
-    
-    leftLayout->addWidget(calendarGroup);
-    leftLayout->addStretch();
-    
-    // 中間面板 - 事件列表
-    QWidget* centerPanel = new QWidget();
-    QVBoxLayout* centerLayout = new QVBoxLayout(centerPanel);
-    
-    // 搜尋和篩選區
-    QGroupBox* filterGroup = new QGroupBox("搜尋與篩選");
-    QVBoxLayout* filterLayout = new QVBoxLayout(filterGroup);
-    
-    m_searchEdit = new QLineEdit();
-    m_searchEdit->setPlaceholderText("搜尋事件標題、描述或地點...");
-    connect(m_searchEdit, &QLineEdit::textChanged,
-            this, &MainWindow::onSearchTextChanged);
-    filterLayout->addWidget(m_searchEdit);
-    
-    QHBoxLayout* dateLayout = new QHBoxLayout();
-    dateLayout->addWidget(new QLabel("開始日期:"));
-    m_startDateEdit = new QDateEdit(QDate::currentDate());
-    m_startDateEdit->setCalendarPopup(true);
-    dateLayout->addWidget(m_startDateEdit);
-    
-    dateLayout->addWidget(new QLabel("結束日期:"));
-    m_endDateEdit = new QDateEdit(QDate::currentDate().addDays(30));
-    m_endDateEdit->setCalendarPopup(true);
-    dateLayout->addWidget(m_endDateEdit);
-    
-    filterLayout->addLayout(dateLayout);
-    
-    QHBoxLayout* platformLayout = new QHBoxLayout();
-    platformLayout->addWidget(new QLabel("平台:"));
-    m_platformFilter = new QComboBox();
-    m_platformFilter->addItems({"全部", "Google", "Outlook"});
-    platformLayout->addWidget(m_platformFilter);
-    
-    m_fetchEventsBtn = new QPushButton("獲取事件");
-    m_fetchEventsBtn->setEnabled(false);
-    connect(m_fetchEventsBtn, &QPushButton::clicked,
-            this, &MainWindow::onFetchEventsClicked);
-    platformLayout->addWidget(m_fetchEventsBtn);
-    
-    filterLayout->addLayout(platformLayout);
-    
-    centerLayout->addWidget(filterGroup);
-    
-    // 事件列表
-    QGroupBox* eventListGroup = new QGroupBox("事件列表");
-    QVBoxLayout* eventListLayout = new QVBoxLayout(eventListGroup);
-    
-    m_eventList = new QListWidget();
-    connect(m_eventList, &QListWidget::itemClicked,
-            this, &MainWindow::onEventSelected);
-    eventListLayout->addWidget(m_eventList);
-    
-    centerLayout->addWidget(eventListGroup);
-    
-    // 右側面板 - 事件詳情
-    QWidget* rightPanel = new QWidget();
-    QVBoxLayout* rightLayout = new QVBoxLayout(rightPanel);
-    rightPanel->setMinimumWidth(300);
-    
-    QGroupBox* detailGroup = new QGroupBox("事件詳情");
-    QVBoxLayout* detailLayout = new QVBoxLayout(detailGroup);
-    
-    m_eventDetails = new QTextEdit();
-    m_eventDetails->setReadOnly(true);
-    m_eventDetails->setPlaceholderText("選擇事件以查看詳情");
-    detailLayout->addWidget(m_eventDetails);
-    
-    rightLayout->addWidget(detailGroup);
-    
-    // 組裝主佈局
-    mainLayout->addWidget(leftPanel);
-    mainLayout->addWidget(centerPanel, 1);
-    mainLayout->addWidget(rightPanel);
-    
-    // 狀態列
-    m_statusLabel = new QLabel("就緒");
-    statusBar()->addWidget(m_statusLabel);
 }
 
 void MainWindow::onGoogleAuthClicked() {
@@ -242,35 +135,35 @@ void MainWindow::onOutlookAuthClicked() {
 
 void MainWindow::onGoogleAuthenticated() {
     m_googleAuthenticated = true;
-    m_googleAuthBtn->setText("✓ Google Calendar 已連接");
-    m_googleAuthBtn->setEnabled(false);
-    m_googleAuthBtn->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; padding: 8px; }");
+    ui->googleAuthBtn->setText("✓ Google Calendar 已連接");
+    ui->googleAuthBtn->setEnabled(false);
+    ui->googleAuthBtn->setStyleSheet("QPushButton { background-color: #4CAF50; color: white; padding: 6px; }");
     
     m_manager->addAdapter(m_googleAdapter);
     
     // 更新行事曆樹狀圖
-    QTreeWidgetItem* googleItem = new QTreeWidgetItem(m_calendarTree);
+    QTreeWidgetItem* googleItem = new QTreeWidgetItem(ui->calendarTree);
     googleItem->setText(0, "Google Calendar");
     googleItem->setIcon(0, QIcon());
     
-    m_fetchEventsBtn->setEnabled(true);
+    ui->fetchEventsBtn->setEnabled(true);
     updateStatusBar("Google Calendar 認證成功");
 }
 
 void MainWindow::onOutlookAuthenticated() {
     m_outlookAuthenticated = true;
-    m_outlookAuthBtn->setText("✓ Outlook 已連接");
-    m_outlookAuthBtn->setEnabled(false);
-    m_outlookAuthBtn->setStyleSheet("QPushButton { background-color: #0078D4; color: white; padding: 8px; }");
+    ui->outlookAuthBtn->setText("✓ Outlook 已連接");
+    ui->outlookAuthBtn->setEnabled(false);
+    ui->outlookAuthBtn->setStyleSheet("QPushButton { background-color: #0078D4; color: white; padding: 6px; }");
     
     m_manager->addAdapter(m_outlookAdapter);
     
     // 更新行事曆樹狀圖
-    QTreeWidgetItem* outlookItem = new QTreeWidgetItem(m_calendarTree);
+    QTreeWidgetItem* outlookItem = new QTreeWidgetItem(ui->calendarTree);
     outlookItem->setText(0, "Microsoft Outlook");
     outlookItem->setIcon(0, QIcon());
     
-    m_fetchEventsBtn->setEnabled(true);
+    ui->fetchEventsBtn->setEnabled(true);
     updateStatusBar("Microsoft Outlook 認證成功");
 }
 
@@ -280,8 +173,8 @@ void MainWindow::onFetchEventsClicked() {
         return;
     }
     
-    QDateTime start(m_startDateEdit->date(), QTime(0, 0));
-    QDateTime end(m_endDateEdit->date(), QTime(23, 59, 59));
+    QDateTime start(ui->startDateEdit->date(), QTime(0, 0));
+    QDateTime end(ui->endDateEdit->date(), QTime(23, 59, 59));
     
     updateStatusBar(QString("正在獲取事件 (%1 至 %2)...")
                    .arg(start.toString("yyyy-MM-dd"))
@@ -313,7 +206,7 @@ void MainWindow::onEventSelected(QListWidgetItem* item) {
     if (!item) return;
     
     // 使用顯示的事件列表，而非所有事件
-    int index = m_eventList->row(item);
+    int index = ui->eventList->row(item);
     if (index >= 0 && index < m_displayedEvents.size()) {
         showEventDetails(m_displayedEvents[index]);
     }
@@ -337,10 +230,10 @@ void MainWindow::onErrorOccurred(const QString& error) {
 }
 
 void MainWindow::updateEventList(const QList<CalendarEvent>& events) {
-    m_eventList->clear();
+    ui->eventList->clear();
     m_displayedEvents.clear();  // 清除顯示的事件列表
     
-    QString platformFilter = m_platformFilter->currentText();
+    QString platformFilter = ui->platformFilter->currentText();
     
     for (const auto& event : events) {
         // 平台篩選
@@ -377,7 +270,7 @@ void MainWindow::updateEventList(const QList<CalendarEvent>& events) {
                 break;
         }
         
-        m_eventList->addItem(item);
+        ui->eventList->addItem(item);
     }
 }
 
@@ -415,10 +308,9 @@ void MainWindow::showEventDetails(const CalendarEvent& event) {
         details += "</ul>";
     }
     
-    m_eventDetails->setHtml(details);
+    ui->eventDetails->setHtml(details);
 }
 
 void MainWindow::updateStatusBar(const QString& message) {
-    m_statusLabel->setText(message);
     statusBar()->showMessage(message, 3000);
 }

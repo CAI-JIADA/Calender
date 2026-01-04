@@ -55,6 +55,10 @@ HEADERS += \
     src/storage/DatabaseManager.h \
     src/ui/MainWindow.h
 
+# UI 檔案
+FORMS += \
+    src/ui/mainwindow.ui
+
 # Include 目錄
 INCLUDEPATH += $$PWD/src
 
