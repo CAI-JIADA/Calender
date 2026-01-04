@@ -215,7 +215,23 @@ set OUTLOOK_CLIENT_SECRET=YOUR_CLIENT_SECRET
 
 ## 常見問題排除
 
-### Q1: 找不到 Qt NetworkAuth
+> 💡 **遇到 OAuth 認證錯誤？** 請查看詳細的 [**OAuth 認證問題排除指南 (OAUTH_TROUBLESHOOTING.md)**](./OAUTH_TROUBLESHOOTING.md)
+
+### Q1: Google Calendar 顯示 "錯誤 400: redirect_uri_mismatch"
+
+**症狀：** 當您嘗試登入 Google Calendar 時看到「已封鎖存取權：這個應用程式的要求無效」和「發生錯誤 400： redirect_uri_mismatch」
+
+**快速解決方案：**
+1. 前往 [Google Cloud Console 憑證頁面](https://console.cloud.google.com/apis/credentials)
+2. 編輯您的 OAuth 2.0 用戶端 ID
+3. 在「授權的重新導向 URI」中確保有：`http://localhost:8080/`（**必須包含結尾的 /** ）
+4. 儲存並重新啟動應用程式
+
+**詳細說明：** 請參閱 [OAUTH_TROUBLESHOOTING.md - Google Calendar 錯誤](./OAUTH_TROUBLESHOOTING.md)
+
+---
+
+### Q2: 找不到 Qt NetworkAuth
 
 **解決方案：**
 ```bash
@@ -229,7 +245,7 @@ brew reinstall qt@6
 # 使用 Qt Maintenance Tool 安裝
 ```
 
-### Q2: OAuth 回調失敗
+### Q3: OAuth 回調失敗
 
 **原因：** 埠被佔用或防火牆阻擋
 
@@ -238,26 +254,23 @@ brew reinstall qt@6
 - 檢查防火牆設定
 - 確認回調 URI 設定正確
 
-### Q2.1: Microsoft Outlook 顯示 "invalid_request: redirect_uri is not valid"
+### Q4: Microsoft Outlook 顯示 "invalid_request: redirect_uri is not valid"
 
-**原因：** Azure AD 應用程式註冊的重新導向 URI 與應用程式使用的 URI 不匹配
+**快速解決方案：**
+1. 前往 [Azure Portal](https://portal.azure.com/)
+2. 開啟您的應用程式註冊 → 選擇「驗證」
+3. 確認「重新導向 URI」設定為 `http://localhost:8081/`（**必須包含結尾斜線**）
+4. 如果已經存在 `http://localhost:8081`（無斜線），請刪除並重新新增 `http://localhost:8081/`（含斜線）
+5. 點選「儲存」並重新啟動應用程式
 
-**解決方案：**
-1. 前往 Azure Portal (https://portal.azure.com/)
-2. 開啟您的應用程式註冊
-3. 選擇「驗證」(Authentication)
-4. 確認「重新導向 URI」設定為 `http://localhost:8081/`（**必須包含結尾斜線**）
-5. 如果已經存在 `http://localhost:8081`（無斜線），請將其刪除並重新新增 `http://localhost:8081/`（含斜線）
-6. 點選「儲存」
-7. 重新建置並執行應用程式
+**詳細說明：** 請參閱 [OAUTH_TROUBLESHOOTING.md - Microsoft Outlook 錯誤](./OAUTH_TROUBLESHOOTING.md)
 
 **注意事項：**
 - Microsoft Azure AD 對重新導向 URI 的格式非常嚴格，必須完全匹配（包括是否有結尾斜線）
-- 應用程式已更新為使用 `setModifyParametersFunction` 明確設定 `redirect_uri` 參數為 `http://localhost:8081/`
-- `redirect_uri` 在授權請求和令牌交換兩個階段都會被正確設定
+- 應用程式已設定使用 `http://localhost:8081/` 作為重新導向 URI
 - 必須確保 Azure AD 註冊的 URI 與程式碼中設定的完全一致
 
-### Q3: 無法獲取事件
+### Q5: 無法獲取事件
 
 **可能原因：**
 - Access Token 過期
@@ -279,6 +292,6 @@ brew reinstall qt@6
 
 ---
 
-**最後更新**: 2024 年 12 月
+**最後更新**: 2026 年 1 月
 
 **版本**: 2.0.0
